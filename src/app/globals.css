@@ -1,0 +1,643 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* AgentLink Custom Theme - Mobile-first Dark Mode */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  
+  /* Custom AgentLink Colors */
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  
+  /* shadcn theme mappings */
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+/* Dark mode as default - AgentLink is dark-first */
+:root {
+  --radius: 0.625rem;
+  
+  /* AgentLink Color Palette - Dark Theme */
+  --background: hsl(0, 0%, 7%);          /* #121212 */
+  --foreground: hsl(0, 0%, 95%);         /* #f2f2f2 */
+  --surface: hsl(0, 0%, 12%);            /* #1e1e1e */
+  --surface-hover: hsl(0, 0%, 16%);      /* #292929 */
+  --border: hsl(0, 0%, 20%);             /* #333333 */
+  --text-primary: hsl(0, 0%, 95%);       /* #f2f2f2 */
+  --text-secondary: hsl(0, 0%, 60%);     /* #999999 */
+  --accent: hsl(217, 91%, 60%);          /* #3b82f6 */
+  --success: hsl(142, 76%, 36%);         /* #16a34a */
+  --warning: hsl(38, 92%, 50%);          /* #f59e0b */
+  --error: hsl(0, 84%, 60%);             /* #ef4444 */
+  
+  /* shadcn color mappings */
+  --card: hsl(0, 0%, 12%);               /* surface */
+  --card-foreground: hsl(0, 0%, 95%);    /* text primary */
+  --popover: hsl(0, 0%, 12%);            /* surface */
+  --popover-foreground: hsl(0, 0%, 95%); /* text primary */
+  --primary: hsl(217, 91%, 60%);         /* accent blue */
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(0, 0%, 16%);          /* surface hover */
+  --secondary-foreground: hsl(0, 0%, 95%); /* text primary */
+  --muted: hsl(0, 0%, 16%);              /* surface hover */
+  --muted-foreground: hsl(0, 0%, 60%);   /* text secondary */
+  --destructive: hsl(0, 84%, 60%);       /* error */
+  --input: hsl(0, 0%, 20%);              /* border */
+  --ring: hsl(217, 91%, 60%);            /* accent */
+  
+  /* Chart colors */
+  --chart-1: hsl(217, 91%, 60%);
+  --chart-2: hsl(142, 76%, 36%);
+  --chart-3: hsl(38, 92%, 50%);
+  --chart-4: hsl(0, 84%, 60%);
+  --chart-5: hsl(280, 65%, 60%);
+  
+  /* Sidebar */
+  --sidebar: hsl(0, 0%, 12%);
+  --sidebar-foreground: hsl(0, 0%, 95%);
+  --sidebar-primary: hsl(217, 91%, 60%);
+  --sidebar-primary-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent: hsl(0, 0%, 16%);
+  --sidebar-accent-foreground: hsl(0, 0%, 95%);
+  --sidebar-border: hsl(0, 0%, 20%);
+  --sidebar-ring: hsl(217, 91%, 60%);
+}
+
+/* Light mode support (optional) */
+.light {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(0, 0%, 10%);
+  --surface: hsl(0, 0%, 96%);
+  --surface-hover: hsl(0, 0%, 90%);
+  --border: hsl(0, 0%, 85%);
+  --text-primary: hsl(0, 0%, 10%);
+  --text-secondary: hsl(0, 0%, 45%);
+  --accent: hsl(217, 91%, 60%);
+  --success: hsl(142, 76%, 36%);
+  --warning: hsl(38, 92%, 50%);
+  --error: hsl(0, 84%, 60%);
+  
+  --card: hsl(0, 0%, 96%);
+  --card-foreground: hsl(0, 0%, 10%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 10%);
+  --primary: hsl(217, 91%, 60%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(0, 0%, 90%);
+  --secondary-foreground: hsl(0, 0%, 10%);
+  --muted: hsl(0, 0%, 90%);
+  --muted-foreground: hsl(0, 0%, 45%);
+  --destructive: hsl(0, 84%, 60%);
+  --input: hsl(0, 0%, 85%);
+  --ring: hsl(217, 91%, 60%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  
+  html {
+    @apply antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Mobile-first scroll behavior */
+  html, body {
+    @apply overscroll-none;
+    touch-action: manipulation;
+  }
+  
+  /* Safe area insets for mobile devices */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+@layer utilities {
+  /* Custom scrollbar for dark theme */
+  .scrollbar-dark {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(0, 0%, 25%) transparent;
+  }
+  
+  .scrollbar-dark::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .scrollbar-dark::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-dark::-webkit-scrollbar-thumb {
+    background-color: hsl(0, 0%, 25%);
+    border-radius: 3px;
+  }
+  
+  .scrollbar-dark::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(0, 0%, 35%);
+  }
+  
+  /* Animation utilities */
+  .animate-in {
+    animation: animateIn 0.2s ease-out;
+  }
+  
+  @keyframes animateIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Focus ring for accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  /* ============================================
+     PWA-Specific Styles
+     ============================================ */
+  
+  /* Standalone mode detection and adjustments */
+  @media (display-mode: standalone) {
+    /* App is running as installed PWA */
+    .standalone-only {
+      display: block;
+    }
+    
+    .browser-only {
+      display: none;
+    }
+    
+    /* Add extra padding for status bar on iOS */
+    .safe-top-standalone {
+      padding-top: max(env(safe-area-inset-top), 20px);
+    }
+    
+    /* Remove browser-specific UI elements */
+    body {
+      /* Prevent pull-to-refresh in standalone mode */
+      overscroll-behavior-y: none;
+    }
+  }
+  
+  @media (display-mode: browser) {
+    .standalone-only {
+      display: none;
+    }
+    
+    .browser-only {
+      display: block;
+    }
+  }
+  
+  /* iOS-specific adjustments */
+  @supports (-webkit-touch-callout: none) {
+    /* CSS specific to iOS devices */
+    .ios-momentum-scroll {
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Fix for iOS 100vh issue */
+    .h-screen-ios {
+      height: -webkit-fill-available;
+      height: 100dvh;
+    }
+    
+    /* Disable text size adjustment */
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+    
+    /* Prevent callout menu */
+    .no-callout {
+      -webkit-touch-callout: none;
+    }
+    
+    /* Disable user select where appropriate */
+    .no-select {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  }
+  
+  /* Android-specific adjustments */
+  @supports not (-webkit-touch-callout: none) {
+    /* CSS specific to non-iOS devices (mostly Android) */
+    .android-momentum-scroll {
+      overscroll-behavior: contain;
+    }
+  }
+  
+  /* Touch action optimizations */
+  .touch-pan-y {
+    touch-action: pan-y;
+  }
+  
+  .touch-pan-x {
+    touch-action: pan-x;
+  }
+  
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  .touch-none {
+    touch-action: none;
+  }
+  
+  /* Prevent text selection during touch interactions */
+  .touch-no-select {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Smooth scrolling with momentum */
+  .scroll-smooth-momentum {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* PWA Install prompt animation */
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  /* Pulse animation for status indicators */
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0.8);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+  
+  .pulse-ring::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  }
+  
+  /* Offline indicator styles */
+  .offline-banner {
+    background: linear-gradient(90deg, var(--warning) 0%, hsl(38, 92%, 45%) 100%);
+  }
+  
+  /* Safe area utilities for notched devices */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .pl-safe {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .pr-safe {
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  .px-safe {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  .py-safe {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Bottom sheet styles for mobile */
+  .bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-radius: 1.5rem 1.5rem 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Modal overlay for mobile */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+/* ============================================
+   Service Worker Update UI
+   ============================================ */
+
+.sw-update-prompt {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  padding: env(safe-area-inset-top) 1rem 1rem;
+  transform: translateY(-100%);
+  transition: transform 0.3s ease-out;
+}
+
+.sw-update-prompt.visible {
+  transform: translateY(0);
+}
+
+/* ============================================
+   Reduced Motion Support
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-in,
+  .animate-slide-up {
+    animation: none;
+  }
+}
+
+/* ============================================
+   Dark Mode Support
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+  /* Ensure dark colors are applied when system prefers dark */
+  :root:not(.light) {
+    color-scheme: dark;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  /* Light mode support if needed */
+  :root.light {
+    color-scheme: light;
+  }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+}
+
+/* ============================================
+   Custom Scrollbar Styling
+   ============================================ */
+
+/* Global scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsl(0, 0%, 25%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(0, 0%, 35%);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(0, 0%, 25%) transparent;
+}
+
+/* ============================================
+   Focus Visible Styles
+   ============================================ */
+
+/* Enhanced focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid hsl(217, 91%, 60%);
+  outline-offset: 2px;
+}
+
+/* Remove default focus outline, use focus-visible instead */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Button focus styles */
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid hsl(217, 91%, 60%);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* Input focus styles */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid hsl(217, 91%, 60%);
+  outline-offset: 0;
+}
+
+/* ============================================
+   Selection Colors
+   ============================================ */
+
+::selection {
+  background-color: hsl(217, 91%, 60%, 0.3);
+  color: inherit;
+}
+
+::-moz-selection {
+  background-color: hsl(217, 91%, 60%, 0.3);
+  color: inherit;
+}
+
+/* Code selection */
+code::selection,
+pre::selection {
+  background-color: hsl(217, 91%, 60%, 0.4);
+}
+
+/* ============================================
+   Smooth Scrolling
+   ============================================ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Smooth scroll for specific containers */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* ============================================
+   Additional Utility Classes
+   ============================================ */
+
+/* Text balance for better typography */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Prevent text selection */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection */
+.allow-select {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Improved touch action */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* Hardware acceleration for animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}

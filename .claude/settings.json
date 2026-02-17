@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install*)",
+      "Bash(npx *)",
+      "Bash(npm run *)",
+      "Bash(npm test*)",
+      "Bash(npx create-next-app*)",
+      "Bash(npx shadcn*)",
+      "Bash(npx ai-elements*)",
+      "Bash(git *)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Bash(cat *)",
+      "Bash(cd *)",
+      "Bash(node *)",
+      "Bash(npx vitest*)",
+      "Bash(npx playwright*)",
+      "Bash(npx supabase*)",
+      "Bash(npx tsc*)"
+    ]
+  }
+}
