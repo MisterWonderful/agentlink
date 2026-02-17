@@ -8,6 +8,7 @@ import {
   captureInstallPrompt,
 } from "@/lib/pwa/service-worker-registration";
 import { useAgentStore, useUIStore, useChatStore } from "@/stores";
+import { initFilesStore } from "@/lib/files/file-store";
 import { subscribeToQueue } from "@/lib/chat/offline-queue";
 import { useMultiAgentHealthMonitor } from "@/hooks/use-health-monitor";
 import { cn } from "@/lib/utils";
@@ -83,11 +84,12 @@ export function AppInitializer({ children }: AppInitializerProps): React.JSX.Ele
         // Set initial offline state
         setOffline(!navigator.onLine);
 
-        // Step 4: Hydrate stores
+        // Step 4: Hydrate stores and initialize file storage
         await Promise.all([
           loadAgents(),
           loadConversations(),
           loadMessages(),
+          initFilesStore(),
         ]);
 
         // Step 5: Set up queue monitoring

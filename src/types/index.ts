@@ -8,6 +8,9 @@
 // Re-export all schemas and types from schemas directory
 export * from './schemas';
 
+// Re-export macro types
+export * from './macros';
+
 // Re-export database types for backward compatibility
 export {
   db,

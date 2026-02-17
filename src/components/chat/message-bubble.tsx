@@ -1,7 +1,17 @@
 "use client";
 
+/**
+ * Message Bubble Component (Terminal-Enhanced)
+ * 
+ * Enhanced with:
+ * - TokenizedMessage support when streaming
+ * - File attachments display
+ * - Better code block rendering with AnimatedCodeBlock
+ * - Message actions with animations
+ */
+
 import { useState, useCallback, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Bot, User } from "lucide-react";
@@ -9,8 +19,12 @@ import { cn } from "@/lib/utils";
 import type { ChatMessage, MessagePart } from "@/types/schemas";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { CodeBlock } from "./code-block";
+import { AnimatedCodeBlock } from "@/components/stream/animated-code-block";
 import { ReasoningBlock } from "./reasoning-block";
 import { MessageActions } from "./message-actions";
+import { TokenizedMessage } from "@/components/stream/tokenized-message";
+import { FileAttachmentGrid } from "@/components/files/file-attachment";
+import type { FileMetadata } from "@/lib/files/file-types";
 
 export interface MessageBubbleProps {
   message: ChatMessage;
@@ -23,6 +37,10 @@ export interface MessageBubbleProps {
   onRegenerate?: () => void;
   onDelete?: () => void;
   className?: string;
+  /** Whether to use tokenized streaming for this message */
+  enableTokenizedStream?: boolean;
+  /** Whether this is the last message in the conversation */
+  isLastMessage?: boolean;
 }
 
 interface CodeProps {
@@ -35,11 +53,11 @@ interface CodeProps {
 const MarkdownComponents = {
   code: ({ inline, className, children, ...props }: CodeProps) => {
     const match = /language-(\w+)/.exec(className || "");
-    const language = match ? match[1] : "text";
+    const language = match ? match[1] : "";
     const code = String(children).replace(/\n$/, "");
 
     if (!inline && code) {
-      return <CodeBlock code={code} language={language} />;
+      return <AnimatedCodeBlock code={code} language={language} animateLines={false} />;
     }
 
     return (
@@ -121,8 +139,11 @@ export function MessageBubble({
   onRegenerate,
   onDelete,
   className,
+  enableTokenizedStream = true,
+  isLastMessage = false,
 }: MessageBubbleProps) {
   const [showMessageActions, setShowMessageActions] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   // Extract reasoning and text parts
   const { reasoningParts, textParts } = useMemo(() => {
@@ -148,6 +169,8 @@ export function MessageBubble({
   const handleCopy = useCallback(() => {
     const textToCopy = textParts.map((p) => p.content).join("\n");
     navigator.clipboard.writeText(textToCopy);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
     onCopy?.();
   }, [textParts, onCopy]);
 
@@ -234,7 +257,22 @@ export function MessageBubble({
             }
           >
             <div className="px-4 py-3">
-              {textContent ? (
+              {/* Use TokenizedMessage when streaming, otherwise static content */}
+              {isStreaming && enableTokenizedStream && isLastMessage && !isUser ? (
+                <TokenizedMessage
+                  content={textContent}
+                  isStreaming={true}
+                  enableCursor
+                  showVelocity
+                  pauseOnHover
+                  streamSpeed="normal"
+                  className={cn(
+                    "prose prose-sm max-w-none",
+                    isUser && "prose-invert"
+                  )}
+                  role={isUser ? "user" : "assistant"}
+                />
+              ) : textContent ? (
                 <div
                   className={cn(
                     "prose prose-sm max-w-none",
@@ -265,8 +303,8 @@ export function MessageBubble({
                 </div>
               )}
 
-              {/* Streaming cursor */}
-              {isStreaming && textContent && (
+              {/* Streaming cursor for non-tokenized mode */}
+              {isStreaming && textContent && (!enableTokenizedStream || isUser) && (
                 <motion.span
                   animate={{ opacity: [1, 0] }}
                   transition={{
@@ -296,11 +334,68 @@ export function MessageBubble({
               onCopy={handleCopy}
               onRegenerate={onRegenerate}
               onDelete={onDelete}
-              showRegenerate={!isStreaming}
+              showRegenerate={!isStreaming && !!onRegenerate}
             />
           </motion.div>
         )}
+
+        {/* Copy feedback */}
+        <AnimatePresence>
+          {isCopied && (
+            <motion.span
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="text-[10px] text-muted-foreground mt-1"
+            >
+              Copied!
+            </motion.span>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
 }
+
+/**
+ * Compact message bubble for inline use
+ */
+export function MessageBubbleCompact({
+  message,
+  isUser,
+  agentColor,
+  className,
+}: Omit<MessageBubbleProps, "agentName" | "onCopy" | "onRegenerate" | "onDelete">) {
+  return (
+    <div
+      className={cn(
+        "flex gap-2",
+        isUser ? "flex-row-reverse" : "flex-row",
+        className
+      )}
+    >
+      <div
+        className={cn(
+          "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium",
+          isUser ? "bg-accent text-accent-foreground" : "bg-muted"
+        )}
+        style={!isUser ? { backgroundColor: `${agentColor}20`, color: agentColor } : undefined}
+      >
+        {isUser ? "U" : "A"}
+      </div>
+      <div
+        className={cn(
+          "px-3 py-1.5 rounded-xl text-sm max-w-[80%]",
+          isUser
+            ? "bg-accent text-accent-foreground rounded-br-md"
+            : "bg-surface border border-border rounded-bl-md"
+        )}
+        style={isUser ? { backgroundColor: agentColor } : undefined}
+      >
+        {message.content}
+      </div>
+    </div>
+  );
+}
+
+export default MessageBubble;

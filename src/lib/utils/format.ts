@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
+import { format, formatDistanceToNow, isValid, parseISO, isSameDay as dateFnsIsSameDay } from 'date-fns';
 
 /**
  * Formatting Utilities
@@ -55,6 +55,48 @@ export function formatRelativeTime(date: Date | string): string {
 }
 
 /**
+ * Format a date with a custom format string
+ * 
+ * @param date - The date to format (Date object or ISO string)
+ * @param formatStr - The format string (date-fns format)
+ * @returns Formatted date string
+ * 
+ * @example
+ * formatDate(new Date(), 'yyyy-MM-dd') // "2024-01-15"
+ * formatDate(new Date(), 'MMM d, yyyy') // "Jan 15, 2024"
+ */
+export function formatDate(date: Date | string, formatStr: string): string {
+  const parsedDate = typeof date === 'string' ? parseISO(date) : date;
+  
+  if (!isValid(parsedDate)) {
+    return 'Invalid date';
+  }
+
+  return format(parsedDate, formatStr);
+}
+
+/**
+ * Check if two dates are the same day
+ * 
+ * @param date1 - First date (Date object or ISO string)
+ * @param date2 - Second date (Date object or ISO string)
+ * @returns True if same day
+ * 
+ * @example
+ * isSameDay(new Date('2024-01-15'), new Date('2024-01-15')) // true
+ */
+export function isSameDay(date1: Date | string, date2: Date | string): boolean {
+  const parsedDate1 = typeof date1 === 'string' ? parseISO(date1) : date1;
+  const parsedDate2 = typeof date2 === 'string' ? parseISO(date2) : date2;
+  
+  if (!isValid(parsedDate1) || !isValid(parsedDate2)) {
+    return false;
+  }
+
+  return dateFnsIsSameDay(parsedDate1, parsedDate2);
+}
+
+/**
  * Format a date for display in conversation lists
  * Shows time for today, day name for this week, or date for older
  * 
@@ -69,11 +111,11 @@ export function formatMessageDate(date: Date | string): string {
   }
 
   const now = new Date();
-  const isToday = format(parsedDate, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
+  const today = isSameDay(parsedDate, now);
   const isThisWeek = 
     parsedDate > new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  if (isToday) {
+  if (today) {
     return format(parsedDate, 'h:mm a');
   }
 
@@ -322,4 +364,43 @@ export function toTitleCase(str: string): string {
     .split(' ')
     .map(word => capitalize(word.toLowerCase()))
     .join(' ');
+}
+
+/**
+ * Format a relative date for date separators
+ * Shows "Today", "Yesterday", or the day name for recent dates
+ * 
+ * @param date - The date to format
+ * @returns Relative date string
+ * 
+ * @example
+ * formatRelativeDate(new Date()) // "Today"
+ * formatRelativeDate(yesterday) // "Yesterday"
+ */
+export function formatRelativeDate(date: Date | string): string {
+  const parsedDate = typeof date === 'string' ? parseISO(date) : date;
+  
+  if (!isValid(parsedDate)) {
+    return 'Invalid date';
+  }
+
+  const now = new Date();
+  
+  if (isSameDay(parsedDate, now)) {
+    return 'Today';
+  }
+
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (isSameDay(parsedDate, yesterday)) {
+    return 'Yesterday';
+  }
+
+  const sixDaysAgo = new Date(now);
+  sixDaysAgo.setDate(sixDaysAgo.getDate() - 6);
+  if (parsedDate > sixDaysAgo) {
+    return format(parsedDate, 'EEEE'); // Day name
+  }
+
+  return format(parsedDate, 'MMM d, yyyy');
 }

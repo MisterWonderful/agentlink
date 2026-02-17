@@ -105,6 +105,16 @@
   --sidebar-accent-foreground: hsl(0, 0%, 95%);
   --sidebar-border: hsl(0, 0%, 20%);
   --sidebar-ring: hsl(217, 91%, 60%);
+  
+  /* Terminal-specific theme variables */
+  --terminal-bg: hsl(0, 0%, 7%);
+  --terminal-surface: hsl(0, 0%, 10%);
+  --terminal-border: hsl(0, 0%, 20%);
+  --terminal-accent: hsl(217, 91%, 60%);
+  --terminal-success: hsl(142, 76%, 36%);
+  --terminal-warning: hsl(38, 92%, 50%);
+  --terminal-error: hsl(0, 84%, 60%);
+  --terminal-cursor: hsl(217, 91%, 60%);
 }
 
 /* Light mode support (optional) */
@@ -134,6 +144,11 @@
   --destructive: hsl(0, 84%, 60%);
   --input: hsl(0, 0%, 85%);
   --ring: hsl(217, 91%, 60%);
+  
+  /* Terminal theme in light mode */
+  --terminal-bg: hsl(0, 0%, 100%);
+  --terminal-surface: hsl(0, 0%, 96%);
+  --terminal-border: hsl(0, 0%, 85%);
 }
 
 @layer base {
@@ -611,6 +626,120 @@ html {
 }
 
 /* ============================================
+   Background Effects
+   ============================================ */
+
+/* Subtle gradient background */
+.terminal-background {
+  background: 
+    radial-gradient(ellipse at top, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
+    hsl(0, 0%, 7%);
+}
+
+/* Subtle grid pattern */
+.terminal-grid {
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Animated gradient background */
+.animated-gradient {
+  background: linear-gradient(
+    135deg,
+    hsl(0, 0%, 7%) 0%,
+    hsl(220, 20%, 8%) 50%,
+    hsl(0, 0%, 7%) 100%
+  );
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Glass morphism utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Glow effects */
+.glow-accent {
+  box-shadow: 0 0 20px hsla(217, 91%, 60%, 0.3);
+}
+
+.glow-success {
+  box-shadow: 0 0 20px hsla(142, 76%, 36%, 0.3);
+}
+
+.glow-error {
+  box-shadow: 0 0 20px hsla(0, 84%, 60%, 0.3);
+}
+
+/* Status indicator animations */
+@keyframes status-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.animate-status-pulse {
+  animation: status-pulse 2s ease-in-out infinite;
+}
+
+/* Terminal scanline effect */
+.scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Fade mask for scrolling content */
+.fade-mask-top {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 10%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%);
+}
+
+.fade-mask-bottom {
+  mask-image: linear-gradient(to top, transparent 0%, black 10%);
+  -webkit-mask-image: linear-gradient(to top, transparent 0%, black 10%);
+}
+
+.fade-mask-vertical {
+  mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+/* ============================================
    Additional Utility Classes
    ============================================ */
 
@@ -640,4 +769,356 @@ html {
 .gpu-accelerated {
   transform: translateZ(0);
   backface-visibility: hidden;
+}
+
+/* ============================================
+   Terminal-Specific Styles
+   ============================================ */
+
+/* Stream animations */
+@keyframes token-appear {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cursor-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes line-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes stream-pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Token animation classes */
+.stream-token {
+  will-change: opacity, transform;
+  display: inline;
+}
+
+.stream-token-animate {
+  animation: token-appear 50ms ease-out forwards;
+}
+
+/* Cursor styles */
+.stream-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background-color: var(--terminal-cursor);
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  animation: cursor-blink 1s step-end infinite;
+}
+
+/* File drop zone styles */
+.drop-zone {
+  position: relative;
+  transition: all 0.2s ease-out;
+}
+
+.drop-zone-active {
+  position: relative;
+}
+
+.drop-zone-active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px dashed var(--terminal-accent);
+  border-radius: inherit;
+  background: hsl(217, 91%, 60%, 0.05);
+  pointer-events: none;
+  animation: drop-zone-pulse 1.5s ease-in-out infinite;
+}
+
+.drop-zone-dragging {
+  opacity: 0.7;
+}
+
+@keyframes drop-zone-pulse {
+  0%, 100% {
+    border-color: var(--terminal-accent);
+    background: hsl(217, 91%, 60%, 0.05);
+  }
+  50% {
+    border-color: hsl(217, 91%, 70%);
+    background: hsl(217, 91%, 60%, 0.1);
+  }
+}
+
+/* Editor styles */
+.editor-container {
+  position: relative;
+  background: var(--terminal-surface);
+  border: 1px solid var(--terminal-border);
+  border-radius: 0.75rem;
+  transition: border-color 0.2s ease-out;
+}
+
+.editor-container:focus-within {
+  border-color: var(--terminal-accent);
+  box-shadow: 0 0 0 2px hsl(217, 91%, 60%, 0.1);
+}
+
+.editor-textarea {
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  width: 100%;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--foreground);
+}
+
+.editor-textarea::placeholder {
+  color: var(--text-secondary);
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--terminal-border);
+  background: hsl(0, 0%, 10%);
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.editor-toolbar-button {
+  padding: 0.375rem;
+  border-radius: 0.375rem;
+  color: var(--text-secondary);
+  transition: all 0.15s ease-out;
+}
+
+.editor-toolbar-button:hover {
+  background: hsl(0, 0%, 20%);
+  color: var(--foreground);
+}
+
+/* Macro tray animations */
+.tray-enter {
+  animation: tray-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.tray-exit {
+  animation: tray-exit 0.2s ease-in forwards;
+}
+
+@keyframes tray-enter {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tray-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+/* Macro button styles */
+.macro-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease-out;
+}
+
+.macro-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+.macro-button:hover::before {
+  opacity: 1;
+}
+
+.macro-button:active {
+  transform: scale(0.98);
+}
+
+/* Terminal-specific utilities */
+.terminal-text {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+.terminal-glow {
+  text-shadow: 0 0 10px var(--terminal-accent);
+}
+
+.terminal-border {
+  border-color: var(--terminal-border);
+}
+
+.terminal-surface {
+  background-color: var(--terminal-surface);
+}
+
+/* Stream velocity indicator */
+.velocity-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background: hsl(217, 91%, 60%, 0.1);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--terminal-accent);
+}
+
+.velocity-indicator::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--terminal-accent);
+  border-radius: 50%;
+  animation: stream-pulse 1s ease-in-out infinite;
+}
+
+/* Code block enhancements */
+.code-block-terminal {
+  background: #0d1117;
+  border: 1px solid var(--terminal-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.code-block-terminal pre {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Message bubble enhancements */
+.message-bubble-streaming {
+  position: relative;
+}
+
+.message-bubble-streaming::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--terminal-accent), transparent);
+  animation: streaming-indicator 2s ease-in-out infinite;
+}
+
+@keyframes streaming-indicator {
+  0%, 100% {
+    opacity: 0.5;
+    transform: translateX(-100%);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(100%);
+  }
+}
+
+/* Keyboard shortcut display */
+.kbd-shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.125rem 0.375rem;
+  background: var(--terminal-surface);
+  border: 1px solid var(--terminal-border);
+  border-radius: 0.25rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Connection status indicator */
+.connection-indicator {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.connection-indicator.online {
+  background: var(--terminal-success);
+  box-shadow: 0 0 6px var(--terminal-success);
+}
+
+.connection-indicator.slow {
+  background: var(--terminal-warning);
+  box-shadow: 0 0 6px var(--terminal-warning);
+}
+
+.connection-indicator.offline {
+  background: var(--terminal-error);
+  box-shadow: 0 0 6px var(--terminal-error);
+}
+
+.connection-indicator::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  opacity: 0;
+  animation: connection-pulse 2s ease-out infinite;
+}
+
+@keyframes connection-pulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
 }

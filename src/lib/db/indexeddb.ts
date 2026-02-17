@@ -174,6 +174,55 @@ export interface LocalMessage {
 }
 
 /**
+ * Stored file metadata and blob
+ */
+export interface LocalFile {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  category: string;
+  mimeType: string;
+  extension: string;
+  previewUrl?: string;
+  thumbnailUrl?: string;
+  uploadProgress: number;
+  uploadStatus: string;
+  errorMessage?: string;
+  checksum?: string;
+  createdAt: Date;
+  conversationId: string;
+  messageId?: string;
+  blob: Blob;
+  thumbnailBlob?: Blob;
+  isQueued: number; // 0 or 1 for Dexie boolean
+  uploadAttempts: number;
+  lastUploadAttempt?: number;
+  expiresAt?: number;
+}
+
+/**
+ * Upload session for resumable uploads
+ */
+export interface LocalUploadSession {
+  checksum: string;
+  fileId: string;
+  fileName: string;
+  fileSize: number;
+  chunks: {
+    index: number;
+    start: number;
+    end: number;
+    size: number;
+    retries: number;
+    status: string;
+  }[];
+  endpoint: string;
+  createdAt: number;
+  metadata: LocalFile;
+}
+
+/**
  * AgentLinkDB - Main Dexie database class for AgentLink.
  * 
  * Stores all message content and local copies of agent configs.
@@ -187,6 +236,10 @@ export class AgentLinkDB extends Dexie {
   conversations!: Table<LocalConversation>;
   /** Messages table - stores all message content */
   messages!: Table<LocalMessage>;
+  /** Files table - stores file blobs and metadata */
+  files!: Table<LocalFile>;
+  /** Upload sessions table - stores resumable upload state */
+  uploadSessions!: Table<LocalUploadSession>;
 
   constructor() {
     super('agentlink');
@@ -198,6 +251,17 @@ export class AgentLinkDB extends Dexie {
       conversations: 'id, agentId, title, isPinned, isArchived, updatedAt, [agentId+updatedAt]',
       // [conversationId+createdAt] compound index for loading messages in order
       messages: 'id, conversationId, role, status, createdAt, [conversationId+createdAt]',
+    });
+    
+    // Version 2: Add files and uploadSessions tables
+    this.version(2).stores({
+      agents: 'id, serverId, name, agentType, isActive, sortOrder',
+      conversations: 'id, agentId, title, isPinned, isArchived, updatedAt, [agentId+updatedAt]',
+      messages: 'id, conversationId, role, status, createdAt, [conversationId+createdAt]',
+      // [conversationId+createdAt] compound index for listing files per conversation
+      files: 'id, conversationId, messageId, isQueued, uploadStatus, createdAt, [conversationId+createdAt], [messageId+createdAt]',
+      // checksum as primary key for resumable uploads
+      uploadSessions: 'checksum, fileId, createdAt',
     });
   }
 }

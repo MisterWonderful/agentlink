@@ -1,59 +1,85 @@
 /**
- * UI Components Barrel Export
- * 
- * Central export point for all UI components from shadcn/ui.
- * Import from this file for cleaner imports:
- * 
- * @example
- * import { Button, Card, Dialog } from "@/components/ui";
+ * UI Components
+ *
+ * Reusable UI components for AgentLink.
  */
 
-// Form Elements
-export { Button, buttonVariants } from "./button";
+// Glass morphism components
+export {
+  GlassCard,
+  GlassPanel,
+  FrostedCard,
+  BlurOverlay,
+  type GlassCardProps,
+  type GlassPanelProps,
+  type FrostedCardProps,
+  type BlurOverlayProps,
+} from "./glass-card";
 
-export { Input } from "./input";
+// Glow effects
+export {
+  GlowEffect,
+  GlowButton,
+  GlowCard,
+  AnimatedGlow,
+  type GlowEffectProps,
+  type GlowButtonProps,
+  type GlowCardProps,
+  type AnimatedGlowProps,
+} from "./glow-effect";
 
-export { Textarea } from "./textarea";
+// Smart tooltips
+export {
+  SmartTooltip,
+  KeyboardShortcut,
+  HintBadge,
+  ContextualHint,
+  FeatureHighlight,
+  type SmartTooltipProps,
+  type KeyboardShortcutProps,
+  type HintBadgeProps,
+  type ContextualHintProps,
+  type FeatureHighlightProps,
+} from "./smart-tooltip";
 
-export { Label } from "./label";
+// Terminal skeletons
+export {
+  TerminalSkeleton,
+  MessageSkeleton,
+  CodeBlockSkeleton,
+  ConversationListSkeleton,
+  AgentCardSkeleton,
+  Shimmer,
+  StreamingSkeleton,
+  type TerminalSkeletonProps,
+  type MessageSkeletonProps,
+  type CodeBlockSkeletonProps,
+  type ConversationListSkeletonProps,
+  type AgentCardSkeletonProps,
+  type ShimmerProps,
+  type StreamingSkeletonProps,
+} from "./terminal-skeleton";
 
-// Layout
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
-
-export { Separator } from "./separator";
-
-export { ScrollArea, ScrollBar } from "./scroll-area";
-
-// Display
-export { Badge, badgeVariants } from "./badge";
-
-export { Avatar, AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGroupCount } from "./avatar";
-
-export { Skeleton } from "./skeleton";
-
-// Feedback
-export { Toaster } from "./sonner";
-
-// Overlay
-export { Dialog, DialogPortal, DialogOverlay, DialogClose, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "./dialog";
-
-export { AlertDialog, AlertDialogPortal, AlertDialogOverlay, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel } from "./alert-dialog";
-
-export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription } from "./sheet";
-
-export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuGroup, DropdownMenuPortal, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuRadioGroup } from "./dropdown-menu";
-
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip";
-
-// Navigation
-export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
-
-// Selection
-export { Select, SelectGroup, SelectValue, SelectTrigger, SelectContent, SelectLabel, SelectItem, SelectSeparator, SelectScrollUpButton, SelectScrollDownButton } from "./select";
-
-export { Switch } from "./switch";
-
-export { Slider } from "./slider";
-
-// Utilities
-export { cn } from "@/lib/utils";
+// Re-export shadcn/ui components
+export * from "./alert-dialog";
+export * from "./avatar";
+export * from "./badge";
+export * from "./button";
+export * from "./card";
+export * from "./dialog";
+export * from "./dropdown-menu";
+export * from "./error-fallback";
+export * from "./input";
+export * from "./label";
+export * from "./loading-screen";
+export * from "./scroll-area";
+export * from "./select";
+export * from "./separator";
+export * from "./sheet";
+export * from "./skeleton";
+export * from "./slider";
+export * from "./sonner";
+export * from "./switch";
+export * from "./tabs";
+export * from "./textarea";
+export * from "./tooltip";

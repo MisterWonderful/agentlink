@@ -160,3 +160,13 @@ export interface UIStoreActions {
 }
 
 export type UIStore = UIStoreState & UIStoreActions;
+
+// ============================================
+// Macro Store Types
+// ============================================
+
+export type {
+  MacroStore,
+  MacroStoreState,
+  MacroStoreActions,
+} from '@/types/macros';

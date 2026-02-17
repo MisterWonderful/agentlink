@@ -4,6 +4,7 @@ export { useChatStore } from './chat-store';
 export { useConnectionStore } from './connection-store';
 export { useUIStore } from './ui-store';
 export { useSettingsStore } from './settings-store';
+export { useMacroStore, useMacrosByCategory, useFavoriteMacros, useRecentMacros, useMacroById, useSearchedMacros } from './macro-store';
 
 // Re-export types
 export type {

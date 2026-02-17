@@ -1,32 +1,52 @@
 "use client";
 
+/**
+ * Chat View Component (Terminal-Enhanced)
+ * 
+ * Main chat interface integrating:
+ * - TokenizedMessage for streaming messages
+ * - RichTextEditor for input
+ * - FileDropZone wrapper for drag & drop
+ * - QuickActionsTray integration
+ * - Stream controls when streaming
+ * - Token velocity indicator
+ */
+
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft,
   Wifi,
   WifiOff,
   AlertCircle,
-  MoreVertical,
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAgentStore, useChatStore, useSettingsStore } from "@/stores";
+import { useAgentStore, useChatStore, useSettingsStore, useConnectionStore } from "@/stores";
+import { useMacroStore } from "@/stores/macro-store";
 import { useAgentChat } from "@/hooks/use-agent-chat";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+// Terminal Components
+import { TerminalHeader } from "@/components/terminal/terminal-header";
+import { FileDropZone } from "@/components/files/file-drop-zone";
+import { QuickActionsTray, QuickActionsButton } from "@/components/macros/quick-actions-tray";
+import { StreamControls } from "@/components/stream/stream-controls";
+import { TokenVelocityIndicator } from "@/components/stream/token-velocity-indicator";
+
+// Chat Components
 import { MessageList } from "./message-list";
 import { ChatInput } from "./chat-input";
 import { EmptyChatState } from "./empty-chat-state";
 import { ConversationList } from "./conversation-list";
+import { FileAttachmentList } from "@/components/files/file-attachment";
+
+// File handling
+import { storeFile, type StoredFile } from "@/lib/files/file-store";
+import { createFileMetadata } from "@/lib/files/file-types";
+
+// Types
+import type { Macro } from "@/types/macros";
+import { toast } from "sonner";
 
 export interface ChatViewProps {
   agentId: string;
@@ -44,10 +64,15 @@ export function ChatView({
   const [conversationId, setConversationId] = useState<string | undefined>(
     initialConversationId
   );
+  const [isTrayOpen, setIsTrayOpen] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<StoredFile[]>([]);
 
   // Get stores
   const agent = useAgentStore((state) => state.agents.get(agentId));
   const { showTimestamp } = useSettingsStore();
+  const connectionStatus = useConnectionStore((state) => state.getStatus(agentId));
+  const averageLatency = useConnectionStore((state) => state.getAverageLatency(agentId));
+  
   const {
     activeConversationId,
     setActiveConversation,
@@ -58,6 +83,9 @@ export function ChatView({
     updateConversation,
     getConversationsByAgent,
   } = useChatStore();
+
+  // Get macro store
+  const recordMacroUsage = useMacroStore((state) => state.recordUsage);
 
   // Get chat hook
   const {
@@ -70,8 +98,7 @@ export function ChatView({
     error,
     stop,
     reload,
-    connectionStatus,
-    queuedCount,
+    tokensPerSecond,
   } = useAgentChat({
     agentId,
     conversationId,
@@ -109,6 +136,7 @@ export function ChatView({
       router.push(`/agents/${agentId}/chat/${newConv.id}`);
     } catch (err) {
       console.error("Failed to create conversation:", err);
+      toast.error("Failed to create conversation");
     }
   }, [agentId, createConversation, router]);
 
@@ -149,15 +177,98 @@ export function ChatView({
           // Small delay to let the conversation be set
           setTimeout(() => {
             handleSubmit();
+            setAttachedFiles([]);
           }, 50);
         } catch (err) {
           console.error("Failed to create conversation:", err);
+          toast.error("Failed to create conversation");
         }
       })();
     } else {
       handleSubmit();
+      setAttachedFiles([]);
     }
   }, [conversationId, input, agentId, createConversation, handleSubmit]);
+
+  // Handle file drop
+  const handleFileDrop = useCallback(async (files: File[]) => {
+    if (!conversationId) {
+      toast.error("Please start a conversation first");
+      return;
+    }
+
+    const newFiles: StoredFile[] = [];
+    
+    for (const file of files) {
+      try {
+        const storedFile = await storeFile(file, conversationId);
+        newFiles.push(storedFile);
+        toast.success(`Attached ${file.name}`);
+      } catch (err) {
+        console.error("Failed to store file:", err);
+        toast.error(`Failed to attach ${file.name}`);
+      }
+    }
+
+    setAttachedFiles((prev) => [...prev, ...newFiles]);
+  }, [conversationId]);
+
+  // Handle file removal
+  const handleRemoveFile = useCallback((fileId: string) => {
+    setAttachedFiles((prev) => prev.filter((f) => f.id !== fileId));
+  }, []);
+
+  // Handle macro selection
+  const handleMacroSelect = useCallback((macro: Macro) => {
+    recordMacroUsage(macro.id);
+    
+    // Handle different macro types based on action type
+    switch (macro.action.type) {
+      case 'insert_text':
+        const payload = macro.action.payload as { text?: string; position?: string };
+        if (payload.text) {
+          setInput(input + payload.text);
+        }
+        break;
+      case 'run_command':
+        toast.info(`Command: ${macro.name}`);
+        break;
+      case 'upload_file':
+        toast.info(`File upload: ${macro.name}`);
+        break;
+      default:
+        toast.info(`Macro: ${macro.name}`);
+        break;
+    }
+    
+    setIsTrayOpen(false);
+  }, [recordMacroUsage, setInput]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + K - Open quick actions
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setIsTrayOpen(true);
+      }
+      
+      // Cmd/Ctrl + / - Toggle quick actions
+      if ((e.metaKey || e.ctrlKey) && e.key === "/") {
+        e.preventDefault();
+        setIsTrayOpen((prev) => !prev);
+      }
+      
+      // Escape - Close menus
+      if (e.key === "Escape") {
+        setIsTrayOpen(false);
+        setShowSidebar(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Loading state
   if (!agent) {
@@ -170,6 +281,7 @@ export function ChatView({
 
   const agentConversations = getConversationsByAgent(agentId);
   const hasMessages = messages.length > 0;
+  const currentConversation = agentConversations.find((c) => c.id === conversationId);
 
   return (
     <div className={cn("flex h-full", className)}>
@@ -217,86 +329,26 @@ export function ChatView({
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <header className="flex items-center justify-between px-4 py-3 border-b border-border/50 bg-background/80 backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-            {/* Back button (mobile) */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowSidebar(true)}
-              className="lg:hidden h-9 w-9"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-
-            {/* Agent Info */}
-            <div className="flex items-center gap-3">
-              <Avatar
-                className="h-8 w-8 ring-2 ring-background"
-                style={{ backgroundColor: `${agent.accentColor}20` }}
-              >
-                {agent.avatarUrl && (
-                  <AvatarImage src={agent.avatarUrl} alt={agent.name} />
-                )}
-                <AvatarFallback
-                  style={{ color: agent.accentColor, fontSize: "14px" }}
-                >
-                  {agent.name.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-
-              <div className="min-w-0">
-                <h1 className="font-medium text-sm truncate">{agent.name}</h1>
-                <p className="text-xs text-muted-foreground truncate">
-                  {agent.defaultModel || "Unknown Model"}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Status & Actions */}
-          <div className="flex items-center gap-2">
-            {/* Connection Status */}
-            <div className="flex items-center gap-1.5">
-              {connectionStatus === "online" ? (
-                <Wifi className="h-4 w-4 text-success" />
-              ) : connectionStatus === "offline" ? (
-                <WifiOff className="h-4 w-4 text-error" />
-              ) : (
-                <AlertCircle className="h-4 w-4 text-warning" />
-              )}
-              {queuedCount > 0 && (
-                <Badge variant="secondary" className="text-xs">
-                  {queuedCount} queued
-                </Badge>
-              )}
-            </div>
-
-            {/* More Actions */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <MoreVertical className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleNewConversation}>
-                  New Conversation
-                </DropdownMenuItem>
-                {conversationId && (
-                  <DropdownMenuItem
-                    onClick={() => handleDeleteConversation(conversationId)}
-                    className="text-error"
-                  >
-                    Delete Conversation
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
+      <FileDropZone
+        onFilesDrop={handleFileDrop}
+        accept={["image/*", ".pdf", ".py", ".js", ".ts", ".tsx", ".jsx", ".json", ".md"]}
+        disabled={!conversationId}
+        className="flex-1 flex flex-col min-w-0"
+      >
+        {/* Terminal Header */}
+        <TerminalHeader
+          agent={agent}
+          connectionStatus={connectionStatus}
+          latency={averageLatency}
+          tokensPerSecond={tokensPerSecond || 0}
+          isStreaming={isStreaming}
+          conversationTitle={currentConversation?.title}
+          onSettingsClick={() => router.push(`/agents/${agentId}/settings`)}
+          onNewConversation={handleNewConversation}
+          onBack={() => setShowSidebar(true)}
+          onDelete={conversationId ? () => handleDeleteConversation(conversationId) : undefined}
+          showBack={true}
+        />
 
         {/* Error Banner */}
         <AnimatePresence>
@@ -341,17 +393,104 @@ export function ChatView({
         </div>
 
         {/* Input Area */}
-        <ChatInput
-          input={input}
-          setInput={setInput}
-          onSubmit={handleSend}
-          isLoading={isLoading}
-          isStreaming={isStreaming}
-          onStop={stop}
-          disabled={connectionStatus === "offline"}
-          placeholder={`Message ${agent.name}...`}
-        />
-      </div>
+        <div className="border-t border-border/50 bg-surface/30 safe-bottom">
+          {/* Attached Files */}
+          {attachedFiles.length > 0 && (
+            <div className="px-4 py-2 border-b border-border/30">
+              <FileAttachmentList
+                files={attachedFiles.map((f) => ({
+                  ...createFileMetadata(new File([], f.name), conversationId || ""),
+                  ...f,
+                }))}
+                onRemove={handleRemoveFile}
+                compact
+                maxVisible={4}
+              />
+            </div>
+          )}
+
+          {/* Stream Controls (when streaming) */}
+          <AnimatePresence>
+            {isStreaming && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="px-4 py-2 border-b border-border/30 flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                  <span className="text-xs text-muted-foreground">Generating...</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  {tokensPerSecond !== undefined && tokensPerSecond > 0 && (
+                    <TokenVelocityIndicator
+                      tokensPerSecond={tokensPerSecond}
+                      totalTokens={0}
+                      variant="compact"
+                    />
+                  )}
+                  <StreamControls
+                    isStreaming={isStreaming}
+                    canPause={true}
+                    canSkip={true}
+                    speed="normal"
+                    onPause={stop}
+                    onResume={() => {}}
+                    onSkip={stop}
+                    onSpeedChange={() => {}}
+                    size="sm"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Input with Quick Actions */}
+          <div className="p-4">
+            <div className="relative flex items-end gap-2 max-w-4xl mx-auto">
+              {/* Quick Actions Button */}
+              <QuickActionsButton
+                onClick={() => setIsTrayOpen(true)}
+                isOpen={isTrayOpen}
+              />
+
+              {/* Chat Input */}
+              <div className="flex-1">
+                <ChatInput
+                  input={input}
+                  setInput={setInput}
+                  onSubmit={handleSend}
+                  isLoading={isLoading}
+                  isStreaming={isStreaming}
+                  onStop={stop}
+                  disabled={connectionStatus === "offline"}
+                  placeholder={`Message ${agent.name}...`}
+                  agentId={agentId}
+                  conversationId={conversationId}
+                />
+              </div>
+            </div>
+
+            {/* Keyboard hint */}
+            <div className="mt-2 text-center">
+              <p className="text-[10px] text-muted-foreground">
+                Press <kbd className="px-1 py-0.5 bg-muted rounded text-[9px]">⌘K</kbd>
+                {" for quick actions · "}
+                Press <kbd className="px-1 py-0.5 bg-muted rounded text-[9px]">?</kbd>
+                {" for help"}
+              </p>
+            </div>
+          </div>
+        </div>
+      </FileDropZone>
+
+      {/* Quick Actions Tray */}
+      <QuickActionsTray
+        isOpen={isTrayOpen}
+        onClose={() => setIsTrayOpen(false)}
+        onMacroSelect={handleMacroSelect}
+      />
     </div>
   );
 }

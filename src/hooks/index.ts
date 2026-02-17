@@ -32,3 +32,40 @@ export {
   useThrottle,
   useThrottledCallback,
 } from './use-debounce';
+
+// Drag and drop hooks
+export {
+  useDragDrop,
+  useGlobalDragDrop,
+  type UseDragDropOptions,
+  type UseDragDropReturn,
+} from './use-drag-drop';
+
+// Clipboard hooks
+export {
+  useClipboardPaste,
+  useImagePaste,
+  usePasteTarget,
+  type PastedItem,
+  type PastedItemType,
+  type UseClipboardPasteOptions,
+  type UseClipboardPasteReturn,
+} from './use-clipboard-paste';
+
+// Animation hooks
+export {
+  useSmoothScroll,
+  useChatAutoScroll,
+  type UseSmoothScrollOptions,
+  type UseSmoothScrollReturn,
+  type UseChatAutoScrollOptions,
+} from './use-smooth-scroll';
+
+export {
+  useReducedMotion,
+  useAnimationConfig,
+  useTabVisibility,
+  useAnimationState,
+  type AnimationConfig,
+  type UseAnimationStateReturn,
+} from './use-reduced-motion';
